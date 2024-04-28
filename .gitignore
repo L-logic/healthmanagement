@@ -2,8 +2,10 @@
 bin-debug/
 bin-release/
 [Oo]bj/
+data
+out
 [Bb]in/
-
+__pycache__
 # Other files and folders
 .settings/
 
