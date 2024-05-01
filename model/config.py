@@ -1,6 +1,8 @@
 trainConfig={
-    "math_path":"data/train/train9to12/math",
-    "ruler_path":"data/train/train9to12/ruler",
+    "tra_math_path":"data/train/train9to12/math",
+    "tra_ruler_path":"data/train/train9to12/ruler",
+    "val_math_path":"data/train/val9to12/math",
+    "val_ruler_path":"data/train/val9to12/ruler",
     "learning_rate":0.0001,
     "batch_size":40,
     "epoch_num":60
