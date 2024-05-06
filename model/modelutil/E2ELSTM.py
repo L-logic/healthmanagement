@@ -55,8 +55,10 @@ class TrainData(torch.utils.data.Dataset):
         for _ in range(num_e2e):
             math_data.append([])
         for line in ruler_reader:
-            row = list(map(float, line))
+            d = line[:36]
+            row = list(map(float,d ))
             ruler_data.append(row)
+            break
         for line in math_reader:
             row = list(map(float, line))
             e2e0 = row[0:5]
@@ -91,8 +93,9 @@ class TrainData(torch.utils.data.Dataset):
 
 # 测试集
 class TestData(torch.utils.data.Dataset):
-    def __init__(self, math_path):
-        self.math_path = math_path
+    def __init__(self, math_path,ruler_path):
+        self.math_path = math_path+ '/'
+        self.ruler_path = ruler_path+ '/'
         self.datas = {}
         self.file_label = {}
         label = 0
@@ -130,9 +133,17 @@ class TestData(torch.utils.data.Dataset):
         item = []
         # print(self.datas[index])
         for file, label, blabel in self.datas[index]:
-            f = open(self.math_path + '/' + file.split('_')[0] + '/' + file, 'r+')
+            f = open(self.data_path + '/' + file.split('_')[0] + '/' + file, 'r+')
+            rulerf = open(self.ruler_path + '/' + file.split('_')[0] + '/' + file, 'r+')
             csv_reader = csv.reader(f)
+            ruler_reader = csv.reader(rulerf)
             sample = []
+            rulers = []
+            for line in ruler_reader:
+                d = line[:36]
+                row = list(map(float,d ))
+                rulers.append(row)
+                break
             for _ in range(num_e2e):
                 sample.append([])
             for line in csv_reader:
@@ -140,13 +151,13 @@ class TestData(torch.utils.data.Dataset):
                 e2e0 = row[0:5]
                 e2e1 = row[0:5]
                 e2e2 = row[0:5]
-                for i in range(5, 17):
+                for i in range(5, 11):
                     e2e0.append(row[i])
                 e2e0.append(0)
-                for i in range(17, 29):
+                for i in range(11, 17):
                     e2e1.append(row[i])
                 e2e1.append(0)
-                for i in range(29, 41):
+                for i in range(16, 22):
                     e2e2.append(row[i])
                 e2e2.append(0)
                 sample[0].append(e2e0)
@@ -155,9 +166,10 @@ class TestData(torch.utils.data.Dataset):
             f.close()
 
             sample = torch.tensor(sample, dtype=torch.float32).to(device)
+            rulers = torch.tensor(rulers, dtype=torch.float32).to(device)
             label = torch.tensor(label, dtype=torch.int64).to(device)
             blabel = torch.tensor(blabel, dtype=torch.int64).to(device)
-            item.append((sample, label, blabel, file))
+            item.append((sample,rulers, label, blabel, file))
         return item
 
 # 端到端注意力机制
@@ -212,7 +224,7 @@ class E2ELSTM(nn.Module):
             nn.BatchNorm2d(1),
             )
         self.lstm = nn.LSTM(self.conv_size, self.hidden_size, self.num_layers, batch_first=True)  # batch_first=True仅仅针对输入而言
-        self.linear0 = nn.Linear(self.hidden_size+27, int(self.hidden_size / 2))
+        self.linear0 = nn.Linear(self.hidden_size+36, int(self.hidden_size / 2))
         self.linear1 = nn.Linear(self.hidden_size, int(self.hidden_size / 2))
         self.linear2 = nn.Linear(int(self.hidden_size / 2), int(self.hidden_size / 4))
         self.linearDiog = nn.Linear(int(self.hidden_size / 4), num_classes)
@@ -239,7 +251,7 @@ class E2ELSTM(nn.Module):
         out, _ = self.lstm(new, (h0, c0))  # 送入一个初始的x值，作为输入以及(h0, c0)
                                         # out's shape (batch_size, 序列长度, hidden_dim)
         out = out[:, -1, :]                # 中间的序列长度取-1，表示取序列中的最后一个数据，这个数据长度为hidden_dim，
-        # rulers = rulers.view(-1,27)                                   # 得到的out的shape为(batch_size, hidden_dim)
+        # rulers = rulers.view(-1,36)                                   # 得到的out的shape为(batch_size, hidden_dim)
         # out = torch.cat((out,rulers),dim=1)
         out = self.linear1(out)
         out = self.linear2(out)             # 经过线性层后，out的shape为(batch_size, n_class)

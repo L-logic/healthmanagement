@@ -51,8 +51,10 @@ class TrainData(torch.utils.data.Dataset):
         sample = []
         rulers = []
         for line in ruler_reader:
-            row = list(map(float, line))
+            d = line[:36]
+            row = list(map(float,d ))
             rulers.append(row)
+            break
         for _ in range(num_e2e):
             sample.append([])
         for line in csv_reader:
@@ -123,8 +125,10 @@ class TestData(torch.utils.data.Dataset):
             sample = []
             rulers = []
             for line in ruler_reader:
-                row = list(map(float, line))
+                d = line[:36]
+                row = list(map(float,d ))
                 rulers.append(row)
+                break
             for _ in range(num_e2e):
                 sample.append([])
             for line in csv_reader:
@@ -170,7 +174,7 @@ class CNN(nn.Module):
             nn.ReLU(True),
             nn.BatchNorm2d(self.hidden_size),
             )
-        self.linear0 = nn.Linear(72* self.hidden_size+27, int(self.hidden_size / 2))
+        self.linear0 = nn.Linear(72* self.hidden_size+36, int(self.hidden_size / 2))
         self.linear1 = nn.Linear(72* self.hidden_size, int(self.hidden_size / 2))
         self.linear2 = nn.Linear(int(self.hidden_size / 2), int(self.hidden_size / 4))
         self.linearDiog = nn.Linear(int(self.hidden_size / 4), num_classes)
@@ -181,7 +185,7 @@ class CNN(nn.Module):
     def forward(self, x,ruler):
         x = self.conv(x)
         x = x.view(x.shape[0], x.shape[1] * x.shape[2] * x.shape[3])
-        ruler = ruler.view(-1,27)
+        ruler = ruler.view(-1,36)
         x = torch.cat((x,ruler),dim=1)
         out = self.linear0(x)
         # out = self.linear1(x)
@@ -250,9 +254,12 @@ def test(math_path,ruler_path,result_path,model_path):
     out_dectlabel = []
     lossC = []
     lossD = []
+    depred = []
+    delabel = []
     for item in testLoader:
         for datas,rulers, labels, blabels, files in item:
-            outputs, out_dect = model(datas,rulers)            
+            outputs, out_dect = model(datas,rulers)    
+            probabilities = torch.sigmoid(out_dect[:, 1])              
             loss1 = criterion(outputs, labels)
             loss2 = criterion(out_dect, blabels)
             _, pred_labels = torch.max(outputs, 1)   

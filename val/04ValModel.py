@@ -88,22 +88,27 @@ def draw_confusion_matrix(label_true, label_pred, label_name, pdf_save_path=None
     if not pdf_save_path is None:
         plt.savefig(pdf_save_path, bbox_inches='tight', dpi=dpi)
 
-def getrate(result_path,val_result):
+def getrate(result_path,val_result,num):
     results_df = pd.DataFrame(columns=['Epoch', 'Accuracy', 'Recall', 'FNR', 'FPR',
                                     'Dec', 'RecallD', 'FNRD', 'FPRD']) 
-    df = pd.read_csv(result_path)
-    y_pred = df['outputslist'].to_numpy()  
-    y_true = df['outputslabels'].to_numpy()
-    y_pred_d = df['out_dectlist'].to_numpy()  
-    y_true_d = df['out_dectlabel'].to_numpy()  
-    recall1,fnr1,fpr1 = calculate_metrics(y_true,y_pred)
-    recall2,fnr2,fpr2 = calculate_metrics(y_true_d, y_pred_d)
-    acc1 = getaccuracy(y_true, y_pred)
-    acc2 = getaccuracy(y_true_d, y_pred_d)
-    results_df = results_df.append({'Accuracy': acc1, 'Recall': recall1,
+    for i in range(num):
+        df = pd.read_csv(f"{result_path}/res{i+1}.csv")
+        y_pred = df['outputslist'].to_numpy()  
+        y_true = df['outputslabels'].to_numpy()
+        y_pred_d = df['out_dectlist'].to_numpy()  
+        y_true_d = df['out_dectlabel'].to_numpy()  
+        recall1,fnr1,fpr1 = calculate_metrics(y_true,y_pred)
+        recall2,fnr2,fpr2 = calculate_metrics(y_true_d, y_pred_d)
+        acc1 = getaccuracy(y_true, y_pred)
+        acc2 = getaccuracy(y_true_d, y_pred_d)
+        loss1 = df['lossC'].to_numpy().mean()
+        loss2 = df['lossD'].to_numpy().mean()  
+        loss = loss1+loss2
+        results_df = results_df.append({'Accuracy': acc1, 'Recall': recall1,
                                 'FNR': fnr1, 'FPR': fpr1,'Dec':acc2, 
-                                'RecallD':recall2, 'FNRD':fnr2, 'FPRD':fpr2}, ignore_index=True)
+                                'RecallD':recall2, 'FNRD':fnr2, 'FPRD':fpr2,'loss':loss}, ignore_index=True)
     results_df.to_csv(val_result, index=False)
 
-for i in range(60):
-    getrate(f'out/test/CNNRE/res{i+1}.csv','out/test/CNNRE/01result.csv')
+# TransformerRE
+model_name = 'TransformerRE'
+getrate(f'out/test/{model_name}',f'out/test/{model_name}/01result.csv',70)

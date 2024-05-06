@@ -11,3 +11,9 @@ nohup /root/anaconda3/envs/py37_ns/bin/python model/05lstmTransformer.py > 05lst
 nohup /root/anaconda3/envs/py37_ns/bin/python model/06e2elstm.py > 06e2elstm.log 2>&1 & 3240658
 
 nohup /root/anaconda3/envs/py37_ns/bin/python /root/public/wxn/healthmanagement/model/07CNN.py > 07CNN.log 2>&1 &  3778628 3779199
+
+nohup /root/anaconda3/envs/py37_ns/bin/python /root/public/wxn/healthmanagement/model/02Train.py > 02Train.log 2>&1 & 920971
+
+
+nohup /root/anaconda3/envs/py37_ns/bin/python model/03printRoc.py > 03printRoc.log 2>&1 &
+55661

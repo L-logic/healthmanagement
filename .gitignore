@@ -1,4 +1,11 @@
 # Build and Release Folders
+*.log
+*.pdf
+*.sh
+*.txt
+model
+.vscode
+others
 bin-debug/
 bin-release/
 [Oo]bj/
@@ -8,7 +15,6 @@ out
 __pycache__
 # Other files and folders
 .settings/
-
 # Executables
 *.swf
 *.air

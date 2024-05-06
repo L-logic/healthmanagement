@@ -1,6 +1,6 @@
 trainConfig={
-    "tra_math_path":"data/train/train9to12/math",
-    "tra_ruler_path":"data/train/train9to12/ruler",
+    "tra_math_path":"data/train/train9to12/math1",
+    "tra_ruler_path":"data/train/train9to12/ruler1",
     "val_math_path":"data/train/val9to12/math",
     "val_ruler_path":"data/train/val9to12/ruler",
     "learning_rate":0.0001,

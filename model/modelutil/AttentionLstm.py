@@ -60,9 +60,14 @@ class MyData(torch.utils.data.Dataset):
             math_data[0].append(e2e0)
             math_data[1].append(e2e1)
             math_data[2].append(e2e2)
+        
         for line in ruler_reader:
-            row = list(map(float, line))
+            d = line[:36]
+            row = list(map(float,d ))
             ruler_data.append(row)
+            break
+        
+        # print(ruler_data)
         rulerf.close()
         mathf.close()
         math_data = torch.tensor(math_data, dtype=torch.float32).to(device)
@@ -88,7 +93,7 @@ class SADMRE(nn.Module):
         # self.temporal_attention = TemporalAttention(input_size)  
         self.spacial_attention = SpatialAttention()
         self.lstm = nn.LSTM(6, hidden_size,self.num_layers, batch_first=True)
-        self.linear1 = nn.Linear(hidden_size+27,int(hidden_size/2))
+        self.linear1 = nn.Linear(hidden_size+36,int(hidden_size/2))
         # self.linear2 = nn.Linear(int(hidden_size/2),int(hidden_size/4))
         self.dectLiner = nn.Linear(int(hidden_size/2), 2)  
         self.classLiner = nn.Linear(int(hidden_size/2), class_classes)  
@@ -114,7 +119,7 @@ class SADMRE(nn.Module):
         lstm_out, _ = self.lstm(x,(h0,c0))  
         # 取最后一个时间步的输出作为预测  
         lstm_out = lstm_out[:, -1, :]  
-        ruler = ruler.view(-1,27)
+        ruler = ruler.view(-1,36)
         x_combined = torch.cat((lstm_out, ruler), dim=1)  
         # [40,64]
         # 应用全连接层进行分类或回归  
@@ -191,27 +196,34 @@ def test(math_path,ruler_path,result_path,model_path):
     out_dectlabel = []
     lossC = []
     lossD = []
-    for item in testLoader:
-        for datas,rulers, labels, blabels, files in item:
-            outputs, out_dect = model(datas,rulers)            
-            loss1 = criterion(outputs, labels)
-            loss2 = criterion(out_dect, blabels)
-            _, pred_labels = torch.max(outputs, 1)   
-            outputslist.extend(pred_labels.cpu().numpy().tolist())
-            outputslabels.extend(labels.cpu().numpy().tolist())
-            _, pred_dect = torch.max(out_dect, 1)   
-            out_dectlist.extend(pred_dect.cpu().numpy().tolist())
-            out_dectlabel.extend(blabels.cpu().numpy().tolist())
-            lossC.append(loss1.item())
-            lossD.append(loss2.item())
-            totaltotal += 1
-    df = pd.DataFrame()  
-    df['outputslist'] = [o for o in outputslist] 
-    df['outputslabels'] =  [out for out in outputslabels]
-    df['out_dectlist'] = [d for d in out_dectlist]
-    df['out_dectlabel'] = [out for out in out_dectlabel]
-    df['lossC'] = lossC
-    df['lossD'] = lossD
-    df.to_csv(result_path, index=False)  
+    depred = []
+    delabel = []
+    for datas,rulers, labels, blabels in testLoader:
+        outputs, out_dect = model(datas,rulers)  
+        probabilities = torch.sigmoid(out_dect[:, 1])
+        depred.extend(probabilities.detach().numpy())
+        delabel.extend(blabels.detach().numpy())        
+        
+    #     loss1 = criterion(outputs, labels)
+    #     loss2 = criterion(out_dect, blabels)
+    #     _, pred_labels = torch.max(outputs, 1)   
+    #     outputslist.extend(pred_labels.cpu().numpy().tolist())
+    #     outputslabels.extend(labels.cpu().numpy().tolist())
+    #     _, pred_dect = torch.max(out_dect, 1)   
+    #     out_dectlist.extend(pred_dect.cpu().numpy().tolist())
+    #     out_dectlabel.extend(blabels.cpu().numpy().tolist())
+    #     lossC.append(loss1.item())
+    #     lossD.append(loss2.item())
+        totaltotal += 1
+    # df = pd.DataFrame()  
+    # df['outputslist'] = [o for o in outputslist] 
+    # df['outputslabels'] =  [out for out in outputslabels]
+    # df['out_dectlist'] = [d for d in out_dectlist]
+    # df['out_dectlabel'] = [out for out in out_dectlabel]
+    # df['lossC'] = lossC
+    # df['lossD'] = lossD
+    # df.to_csv(result_path, index=False)  
     
-    print(f"数据已保存到 {result_path} 文件中。")
+    # print(f"数据已保存到 {result_path} 文件中。")
+    print('all:',totaltotal)
+    return probabilities,delabel

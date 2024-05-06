@@ -72,8 +72,8 @@ class TrainData(torch.utils.data.Dataset):
 # 测试集
 class TestData(torch.utils.data.Dataset):
     def __init__(self,  math_path,ruler_path):
-        self.math_path = math_path
-        self.ruler_path = ruler_path
+        self.math_path = math_path+'/'
+        self.ruler_path = ruler_path+'/'
         self.datas = {}
         self.file_label = {}
         label = 0
@@ -105,25 +105,24 @@ class TestData(torch.utils.data.Dataset):
         item = []
         for file, label, blabel in self.datas[index]:
             f1 = open(self.math_path + '/' + file.split('_')[0] + '/' + file, 'r+')
-            # f2 = open(self.ruler_path + '/' + file.split('_')[0] + '/' + file, 'r+')
+            f2 = open(self.ruler_path + '/' + file.split('_')[0] + '/' + file, 'r+')
             csv_reader1 = csv.reader(f1)
-            # csv_reader2 = csv.reader(f2)
+            csv_reader2 = csv.reader(f2)
             sample = []
+            rulers = []
             for line in csv_reader1:
                 row1 = list(map(float, line))
-                row1.pop(0)
                 sample.append(row1)
-            # for line in csv_reader2:
-            #     row2 = list(map(float, line))
-            #     sample.append(row2)
+            for line in csv_reader2:
+                row2 = list(map(float, line))
+                rulers.append(row2)
             f1.close()
-            # f2.close()
-            # samples = [item for sublist in sample for item in sublist]
+            f2.close()
             samples = torch.tensor(sample, dtype=torch.float32).to(device)
-            # samples = torch.tensor(sample, dtype=torch.float32).to(device)
+            rulers = torch.tensor(rulers, dtype=torch.float32).to(device)
             label = torch.tensor(label, dtype=torch.int64).to(device)
             blabel = torch.tensor(blabel, dtype=torch.int64).to(device)
-            item.append((samples, label, blabel, file))
+            item.append((samples,rulers, label, blabel))
         return item
 
 class LSTM(nn.Module):
@@ -242,26 +241,32 @@ def test(math_path,ruler_path,result_path,model_path):
     out_dectlabel = []
     lossC = []
     lossD = []
+    depred = []
+    delabel = []
     for item in testLoader:
-        for datas,rulers, labels, blabels, files in item:
-            outputs, out_dect = model(datas,rulers)            
-            loss1 = criterion(outputs, labels)
-            loss2 = criterion(out_dect, blabels)
-            _, pred_labels = torch.max(outputs, 1)   
-            outputslist.extend(pred_labels.cpu().numpy().tolist())
-            outputslabels.extend(labels.cpu().numpy().tolist())
-            _, pred_dect = torch.max(out_dect, 1)   
-            out_dectlist.extend(pred_dect.cpu().numpy().tolist())
-            out_dectlabel.extend(blabels.cpu().numpy().tolist())
-            lossC.append(loss1.item())
-            lossD.append(loss2.item())
-            totaltotal += 1
-    df = pd.DataFrame()  
-    df['outputslist'] = [o for o in outputslist] 
-    df['outputslabels'] =  [out for out in outputslabels]
-    df['out_dectlist'] = [d for d in out_dectlist]
-    df['out_dectlabel'] = [out for out in out_dectlabel]
-    df['lossC'] = lossC
-    df['lossD'] = lossD
-    df.to_csv(result_path, index=False)  
-    print(f"数据已保存到 {result_path} 文件中。")
+        for datas,rulers, labels, blabels in item:
+            outputs, out_dect = model(datas,rulers)  
+            probabilities = torch.sigmoid(out_dect[:, 1])
+            depred.extend(probabilities.detach().numpy())
+            delabel.extend(blabels.detach().numpy()  )          
+            # loss1 = criterion(outputs, labels)
+            # loss2 = criterion(out_dect, blabels)
+            # _, pred_labels = torch.max(outputs, 1)   
+            # outputslist.extend(pred_labels.cpu().numpy().tolist())
+            # outputslabels.extend(labels.cpu().numpy().tolist())
+            # _, pred_dect = torch.max(out_dect, 1)   
+            # out_dectlist.extend(pred_dect.cpu().numpy().tolist())
+            # out_dectlabel.extend(blabels.cpu().numpy().tolist())
+    #         lossC.append(loss1.item())
+    #         lossD.append(loss2.item())
+    #         totaltotal += 1
+    # df = pd.DataFrame()  
+    # df['outputslist'] = [o for o in outputslist] 
+    # df['outputslabels'] =  [out for out in outputslabels]
+    # df['out_dectlist'] = [d for d in out_dectlist]
+    # df['out_dectlabel'] = [out for out in out_dectlabel]
+    # df['lossC'] = lossC
+    # df['lossD'] = lossD
+    # df.to_csv(result_path, index=False)  
+    # print(f"数据已保存到 {result_path} 文件中。")
+    return probabilities,delabel

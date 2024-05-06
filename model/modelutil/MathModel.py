@@ -1,4 +1,4 @@
-from util.FileUtil import read_by_csv
+from modelutil.FileUtil import read_by_csv
 import numpy as np
 class MathModel:
 	def __init__(self,origin_data) -> None:
