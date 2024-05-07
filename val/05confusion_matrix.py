@@ -25,8 +25,8 @@ def draw_confusion_matrix(label_true, label_pred, label_name, pdf_save_path=None
     cm = confusion_matrix(y_true=label_true, y_pred=label_pred, normalize='true')
     plt.imshow(cm, cmap='Blues')
     # plt.title(title)
-    plt.xlabel("Predict label")
-    plt.ylabel("Truth label")
+    plt.xlabel("Predict Label")
+    plt.ylabel("Truth Label")
     plt.yticks(range(label_name.__len__()), label_name)
     plt.xticks(range(label_name.__len__()), label_name, rotation=45)
 
@@ -54,14 +54,13 @@ def draw_confusion_matrix(label_true, label_pred, label_name, pdf_save_path=None
 # AttentionLstmRE
 data_path = "out/test/TransformerRE/res60.csv"
 df = pd.read_csv(data_path)
-y_pred = df['outputslist'].to_numpy()  
-y_true = df['outputslabels'].to_numpy()
-
-label_name = ["normal","obstacle","out","nodedown","congest","malicious","appdown"]
-# y_pred = df['out_dectlist'].to_numpy()  
-# y_true = df['out_dectlabel'].to_numpy()
-# label_name = ["normal","fault"]
+# y_pred = df['outputslist'].to_numpy()  
+# y_true = df['outputslabels'].to_numpy()
+# label_name = ["normal","obstacle","out","nodedown","congest","malicious","appdown"]
+y_pred = df['out_dectlist'].to_numpy()  
+y_true = df['out_dectlabel'].to_numpy()
+label_name = ["normal","fault"]
         # outputslist outputslabels
 
 draw_confusion_matrix(y_true,y_pred,label_name=label_name,
-                      pdf_save_path="classhunxiao.pdf")
+                      pdf_save_path="decthunxiao.pdf")
