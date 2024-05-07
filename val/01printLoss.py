@@ -11,12 +11,6 @@ lstm = 'out/test/LSTMRE/01result.csv'
 transformer = 'out/test/TransformerRE/01result.csv'
 attentionlstm ='out/test/AttentionLstmRE/01result.csv'
 transformerlstm = 'out/test/LSTMTransformer/01result.csv'
-# LSTM_transformer = [66.53,62.21]
-# SR_CNN = [60.36, 53.89]
-# CL_MPPCA = [69.69, 61.67]
-# AnomalyBERT = [72.02, 68.54]
-# MSADM = [75.17, 71.86]
-# out/test/TransformerRE/01result.csv
 SR_CNN = pd.read_csv(cnn)
 CL_MPPCA = pd.read_csv(lstm)
 AnomalyBERT = pd.read_csv(attentionlstm)
@@ -27,7 +21,6 @@ CL_MPPCA =CL_MPPCA.iloc[:60,-1].tolist()
 AnomalyBERT =AnomalyBERT.iloc[:60,-1].tolist()
 LSTM_transformer =LSTM_transformer.iloc[:60,-1].tolist()
 MSADM = MSADM.iloc[0:60,-1]
-# lstmLoss17D = lstmLoss17.iloc[:,2]
 fig, ax = plt.subplots()  
 x=range(1,61)
 ax.plot(x, SR_CNN,label='SR-CNN')  
@@ -35,19 +28,10 @@ ax.plot(x, CL_MPPCA,label='CL-MPPCA')
 ax.plot(x, AnomalyBERT,label='AnomalyBERT') 
 ax.plot(x, LSTM_transformer,label='LSTM-transformer') 
 ax.plot(x, MSADM,label='MSADM')  
-
-# ax.plot(x, lstmLoss9C,label='Node9to12 Classify')  
-# ax.plot(x, lstmLoss9D,label='Node9to12 Detect')  
-# # ax.plot(x, lstmLoss9C5,label='Node9to125 Classify')  
-# # ax.plot(x, lstmLoss9D5,label='Node9to125 Detect')  
-# ax.plot(x, lstmLoss17C,label='Node17to20 Classify')  
-# ax.plot(x, lstmLoss17D,label='Node17to20 Detect')  
-# print(y)
-# 设置y轴的刻度  
-xticks = np.arange(0,66, 6) # 设置刻度的范围和间隔  
+xticks = np.arange(0,66, 6)
 xticks[0] = 1
-yticks = np.arange(0.5,3.25, 0.25) # 设置刻度的范围和间隔  
-font = {'family': 'Times New Roman', 'weight': 'normal', 'size': 12}  # 修改字体样式
+yticks = np.arange(0.5,3.25, 0.25)
+font = {'family': 'Times New Roman', 'weight': 'normal', 'size': 12}
 plt.rc('font', **font)
 ax.set_yticks(yticks)  
 ax.set_yticklabels(yticks)
@@ -65,12 +49,7 @@ legend.get_texts()[3].set_fontsize(12)
 legend.get_texts()[3].set_fontname('Times New Roman') 
 legend.get_texts()[4].set_fontsize(12)  
 legend.get_texts()[4].set_fontname('Times New Roman') 
-# legend.get_texts()[3].set_fontsize(12)  
-# legend.get_texts()[3].set_fontname('Times New Roman') 
-# legend.get_texts()[4].set_fontsize(12)  
-# legend.get_texts()[4].set_fontname('Times New Roman') 
 plt.xlabel('Epoch', fontsize=12,fontname='Times New Roman')
-# plt.ylabel('Loss Rate', fontsize=12,fontname='Times New Roman') 
 plt.ylabel('Cross Entropy Loss', fontsize=12,fontname='Times New Roman') 
 # 显示图表  
-plt.savefig('loss.pdf',dpi=600, bbox_inches='tight')
+plt.savefig('loss.pdf',dpi=1200, bbox_inches='tight')
