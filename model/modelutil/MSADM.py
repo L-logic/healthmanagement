@@ -99,21 +99,6 @@ class OneDCNNClassifier(torch.nn.Module):
         
         return multiclass_output, binary_output
 
-# \author{Xun Yuan,~\IEEEmembership{Student Member,~IEEE}, Fengxiao Tang,~\IEEEmembership{Member,~IEEE}, \\Ming Zhao,~\IEEEmembership{Member,~IEEE} and Nei Kato,~\IEEEmembership{Fellow,~IEEE}
-#          <-this  stops a space
-#  <-this  stops a space
-# \thanks{This work was supported by the National Key R\&D Program of China (Grant no.2021ZD0140301),
-# National Key R\&D Program of China (Project no.2020AAA0109602), Changsha Municipal Natural Science Foundation (Grant no.kq2208284), Hunan Provincial Natural Science Foundation (Grant no.2023jj40774), National Natural Science Foundation of China (Grant no.62302527), and the High Performance Computing Center of Central South University. (Corresponding author: Fengxiao Tang.)}
-
-# \thanks{
-#  Xun Yuan, Fengxiao Tang, and Ming Zhao are with the School of Computer Science and Engineering, Central South University, Changsha 410083, China (e-mail: yuan.xun@csu.edu.cn; tangfengxiao@csu.edu.cn; meanzhao@csu.edu.cn).
-# }
-# \thanks{
-# Nei Kato is with the Graduate School of Information Sciences (GSIS),
-# Tohoku University, Sendai 980-8576, Japan (e-mail: kato@it.is.tohoku.ac.jp).
-# }
-# }
-
 def train(math_path,ruler_path,learning_rate,batch_size,epoch_num,model_path='',init=True):
     train_dataset = FaultDataset(math_path,ruler_path)
     train_loader = DataLoader(train_dataset, batch_size, shuffle=True)
